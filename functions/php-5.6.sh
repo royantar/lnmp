@@ -5,7 +5,7 @@
 Install_PHP-5-6()
 {
 cd $lnmp_dir/src
-. ../functions/download.sh 
+. ../functions/download.sh
 . ../functions/check_os.sh
 . ../options.conf
 
@@ -18,8 +18,8 @@ src_url=http://www.php.net/distributions/php-$php_6_version.tar.gz && Download_s
 tar xzf libiconv-$libiconv_version.tar.gz
 cd libiconv-$libiconv_version
 ./configure --prefix=/usr/local
-[ -n "`cat /etc/issue | grep 'Ubuntu 13'`" ] && sed -i 's@_GL_WARN_ON_USE (gets@//_GL_WARN_ON_USE (gets@' srclib/stdio.h 
-[ -n "`cat /etc/issue | grep 'Ubuntu 14'`" ] && sed -i 's@gets is a security@@' srclib/stdio.h 
+[ -n "`cat /etc/issue | grep 'Ubuntu 13'`" ] && sed -i 's@_GL_WARN_ON_USE (gets@//_GL_WARN_ON_USE (gets@' srclib/stdio.h
+[ -n "`cat /etc/issue | grep 'Ubuntu 14'`" ] && sed -i 's@gets is a security@@' srclib/stdio.h
 make && make install
 cd ../
 /bin/rm -rf libiconv-$libiconv_version
@@ -62,7 +62,7 @@ cd ../
 
 tar xzf php-$php_6_version.tar.gz
 id -u $run_user >/dev/null 2>&1
-[ $? -ne 0 ] && useradd -M -s /sbin/nologin $run_user 
+[ $? -ne 0 ] && useradd -M -s /sbin/nologin $run_user
 [ ! -e "fpm-race-condition.patch" ] && wget -O fpm-race-condition.patch 'https://bugs.php.net/patch-display.php?bug_id=65398&patch=fpm-race-condition.patch&revision=1375772074&download=1'
 patch -d php-$php_6_version -p0 < fpm-race-condition.patch
 cd php-$php_6_version
@@ -71,7 +71,7 @@ make clean
 [ "$PHP_cache" == '1' ] && PHP_cache_tmp='--enable-opcache' || PHP_cache_tmp='--disable-opcache'
 if [ "$Apache_version" == '1' -o "$Apache_version" == '2' ];then
 CFLAGS= CXXFLAGS= ./configure --prefix=$php_install_dir --with-config-file-path=$php_install_dir/etc \
---with-apxs2=$apache_install_dir/bin/apxs $PHP_cache_tmp --disable-fileinfo \
+--with-apxs2=$apache_install_dir/bin/apxs $PHP_cache_tmp \
 --with-mysql=mysqlnd --with-mysqli=mysqlnd --with-pdo-mysql=mysqlnd \
 --with-iconv-dir=/usr/local --with-freetype-dir --with-jpeg-dir --with-png-dir --with-zlib \
 --with-libxml-dir=/usr --enable-xml --disable-rpath --enable-bcmath --enable-shmop --enable-exif \
@@ -81,7 +81,7 @@ CFLAGS= CXXFLAGS= ./configure --prefix=$php_install_dir --with-config-file-path=
 --with-gettext --enable-zip --enable-soap --disable-ipv6 --disable-debug
 else
 CFLAGS= CXXFLAGS= ./configure --prefix=$php_install_dir --with-config-file-path=$php_install_dir/etc \
---with-fpm-user=$run_user --with-fpm-group=$run_user --enable-fpm $PHP_cache_tmp --disable-fileinfo \
+--with-fpm-user=$run_user --with-fpm-group=$run_user --enable-fpm $PHP_cache_tmp \
 --with-mysql=mysqlnd --with-mysqli=mysqlnd --with-pdo-mysql=mysqlnd \
 --with-iconv-dir=/usr/local --with-freetype-dir --with-jpeg-dir --with-png-dir --with-zlib \
 --with-libxml-dir=/usr --enable-xml --disable-rpath --enable-bcmath --enable-shmop --enable-exif \
@@ -101,7 +101,7 @@ else
         kill -9 $$
 fi
 
-[ -z "`grep ^'export PATH=' /etc/profile`" ] && echo "export PATH=$php_install_dir/bin:\$PATH" >> /etc/profile 
+[ -z "`grep ^'export PATH=' /etc/profile`" ] && echo "export PATH=$php_install_dir/bin:\$PATH" >> /etc/profile
 [ -n "`grep ^'export PATH=' /etc/profile`" -a -z "`grep $php_install_dir /etc/profile`" ] && sed -i "s@^export PATH=\(.*\)@export PATH=$php_install_dir/bin:\1@" /etc/profile
 . /etc/profile
 
@@ -125,7 +125,7 @@ else
 fi
 sed -i "s@^memory_limit.*@memory_limit = ${Memory_limit}M@" $php_install_dir/etc/php.ini
 sed -i 's@^output_buffering =@output_buffering = On\noutput_buffering =@' $php_install_dir/etc/php.ini
-sed -i 's@^;cgi.fix_pathinfo.*@cgi.fix_pathinfo=0@' $php_install_dir/etc/php.ini
+sed -i 's@^;cgi.fix_pathinfo.*@cgi.fix_pathinfo=1@' $php_install_dir/etc/php.ini
 sed -i 's@^short_open_tag = Off@short_open_tag = On@' $php_install_dir/etc/php.ini
 sed -i 's@^expose_php = On@expose_php = Off@' $php_install_dir/etc/php.ini
 sed -i 's@^request_order.*@request_order = "CGP"@' $php_install_dir/etc/php.ini
@@ -173,10 +173,10 @@ cat > $php_install_dir/etc/php-fpm.conf <<EOF
 [global]
 pid = run/php-fpm.pid
 error_log = log/php-fpm.log
-log_level = warning 
+log_level = warning
 
 emergency_restart_threshold = 30
-emergency_restart_interval = 60s 
+emergency_restart_interval = 60s
 process_control_timeout = 5s
 daemonize = yes
 
@@ -188,16 +188,16 @@ daemonize = yes
 listen = /dev/shm/php-cgi.sock
 listen.backlog = -1
 listen.allowed_clients = 127.0.0.1
-listen.owner = $run_user 
+listen.owner = $run_user
 listen.group = $run_user
 listen.mode = 0666
-user = $run_user 
+user = $run_user
 group = $run_user
 
 pm = dynamic
-pm.max_children = 12 
-pm.start_servers = 8 
-pm.min_spare_servers = 6 
+pm.max_children = 12
+pm.start_servers = 8
+pm.min_spare_servers = 6
 pm.max_spare_servers = 12
 pm.max_requests = 2048
 pm.process_idle_timeout = 10s
@@ -216,7 +216,7 @@ env[TMPDIR] = /tmp
 env[TEMP] = /tmp
 EOF
 
-[ -d "/run/shm" -a ! -e "/dev/shm" ] && sed -i 's@/dev/shm@/run/shm@' $php_install_dir/etc/php-fpm.conf $lnmp_dir/vhost.sh $lnmp_dir/conf/nginx.conf 
+[ -d "/run/shm" -a ! -e "/dev/shm" ] && sed -i 's@/dev/shm@/run/shm@' $php_install_dir/etc/php-fpm.conf $lnmp_dir/vhost.sh $lnmp_dir/conf/nginx.conf
 
 if [ $Mem -le 3000 ];then
 	sed -i "s@^pm.max_children.*@pm.max_children = $(($Mem/2/20))@" $php_install_dir/etc/php-fpm.conf
@@ -245,7 +245,7 @@ elif [ $Mem -gt 8500 ];then
         sed -i "s@^pm.max_spare_servers.*@pm.max_spare_servers = 120@" $php_install_dir/etc/php-fpm.conf
 fi
 
-#[ "$Web_yn" == 'n' ] && sed -i "s@^listen =.*@listen = $local_IP:9000@" $php_install_dir/etc/php-fpm.conf 
+#[ "$Web_yn" == 'n' ] && sed -i "s@^listen =.*@listen = $local_IP:9000@" $php_install_dir/etc/php-fpm.conf
 service php-fpm start
 elif [ "$Apache_version" == '1' -o "$Apache_version" == '2' ];then
 service httpd restart
