@@ -3,14 +3,14 @@
 # Blog:  http://blog.linuxeye.com
 #
 # Version: 0.9 8-May-2015 lj2007331 AT gmail.com
-# Notes: LNMP/LAMP/LANMP for CentOS/RadHat 5+ Debian 6+ and Ubuntu 12+ 
+# Notes: LNMP/LAMP/LANMP for CentOS/RadHat 5+ Debian 6+ and Ubuntu 12+
 #
 # This script's project home is:
 #       http://blog.linuxeye.com/31.html
 #       https://github.com/lj2007331/lnmp
 
 # Check if user is root
-[ $(id -u) != "0" ] && { echo -e "\033[31mError: You must be root to run this script\033[0m"; exit 1; } 
+[ $(id -u) != "0" ] && { echo -e "\033[31mError: You must be root to run this script\033[0m"; exit 1; }
 
 export PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 clear
@@ -77,7 +77,7 @@ done
 while :
 do
         echo
-        read -p "Please input SSH port(Default: $ssh_port): " SSH_PORT 
+        read -p "Please input SSH port(Default: $ssh_port): " SSH_PORT
 	[ -z "$SSH_PORT" ] && SSH_PORT=$ssh_port
         if [ $SSH_PORT -eq 22 >/dev/null 2>&1 -o $SSH_PORT -gt 1024 >/dev/null 2>&1 -a $SSH_PORT -lt 65535 >/dev/null 2>&1 ];then
                 break
@@ -89,7 +89,7 @@ done
 if [ -z "`grep ^Port /etc/ssh/sshd_config`" -a "$SSH_PORT" != '22' ];then
 	sed -i "s@^#Port.*@&\nPort $SSH_PORT@" /etc/ssh/sshd_config
 elif [ -n "`grep ^Port /etc/ssh/sshd_config`" ];then
-	sed -i "s@^Port.*@Port $SSH_PORT@" /etc/ssh/sshd_config 
+	sed -i "s@^Port.*@Port $SSH_PORT@" /etc/ssh/sshd_config
 fi
 
 # check Web server
@@ -151,6 +151,7 @@ do
                         do
                                 echo
                                 echo 'Please select a version of the Database:'
+                                echo -e "\t\033[32m0\033[0m. Install MySQL-5.7"
                                 echo -e "\t\033[32m1\033[0m. Install MySQL-5.6"
                                 echo -e "\t\033[32m2\033[0m. Install MySQL-5.5"
                                 echo -e "\t\033[32m3\033[0m. Install MariaDB-10.0"
@@ -203,11 +204,11 @@ else
 				while :
 				do
 					echo
-					read -p "Do you want to install opcode cache of the PHP? [y/n]: " PHP_cache_yn 
+					read -p "Do you want to install opcode cache of the PHP? [y/n]: " PHP_cache_yn
 					if [ "$PHP_cache_yn" != 'y' -a "$PHP_cache_yn" != 'n' ];then
 						echo -e "\033[31minput error! Please only input 'y' or 'n'\033[0m"
 					else
-						if [ "$PHP_cache_yn" == 'y' ];then	
+						if [ "$PHP_cache_yn" == 'y' ];then
                                                         if [ $PHP_version == 1 ];then
                                                                 while :
                                                                 do
@@ -419,7 +420,7 @@ do
 done
 fi
 
-# check jemalloc or tcmalloc 
+# check jemalloc or tcmalloc
 if [ "$Web_yn" == 'y' -o "$DB_yn" == 'y' ];then
         while :
         do
@@ -494,32 +495,35 @@ elif [ "$je_tc_malloc_yn" == 'y' -a "$je_tc_malloc" == '2' -a ! -e "/usr/local/l
 fi
 
 # Database
-if [ "$DB_version" == '1' ];then
-	. functions/mysql-5.6.sh 
-	Install_MySQL-5-6 2>&1 | tee -a $lnmp_dir/install.log 
+if [ "$DB_version" == '0' ];then
+	. functions/mysql-5.7.sh
+	Install_MySQL-5-7 2>&1 | tee -a $lnmp_dir/install.log
+elif [ "$DB_version" == '1' ];then
+	. functions/mysql-5.6.sh
+	Install_MySQL-5-6 2>&1 | tee -a $lnmp_dir/install.log
 elif [ "$DB_version" == '2' ];then
         . functions/mysql-5.5.sh
         Install_MySQL-5-5 2>&1 | tee -a $lnmp_dir/install.log
 elif [ "$DB_version" == '3' ];then
 	. functions/mariadb-10.0.sh
-	Install_MariaDB-10-0 2>&1 | tee -a $lnmp_dir/install.log 
+	Install_MariaDB-10-0 2>&1 | tee -a $lnmp_dir/install.log
 elif [ "$DB_version" == '4' ];then
 	. functions/mariadb-5.5.sh
-	Install_MariaDB-5-5 2>&1 | tee -a $lnmp_dir/install.log 
+	Install_MariaDB-5-5 2>&1 | tee -a $lnmp_dir/install.log
 elif [ "$DB_version" == '5' ];then
         . functions/percona-5.6.sh
         Install_Percona-5-6 2>&1 | tee -a $lnmp_dir/install.log
 elif [ "$DB_version" == '6' ];then
-	. functions/percona-5.5.sh 
-	Install_Percona-5-5 2>&1 | tee -a $lnmp_dir/install.log 
+	. functions/percona-5.5.sh
+	Install_Percona-5-5 2>&1 | tee -a $lnmp_dir/install.log
 fi
 
 # Apache
 if [ "$Apache_version" == '1' ];then
-	. functions/apache-2.4.sh 
+	. functions/apache-2.4.sh
 	Install_Apache-2-4 2>&1 | tee -a $lnmp_dir/install.log
 elif [ "$Apache_version" == '2' ];then
-	. functions/apache-2.2.sh 
+	. functions/apache-2.2.sh
 	Install_Apache-2-2 2>&1 | tee -a $lnmp_dir/install.log
 fi
 
@@ -561,7 +565,7 @@ if [ "$PHP_cache" == '1' ] && [ "$PHP_version" == '1' -o "$PHP_version" == '2' ]
         . functions/zendopcache.sh
         Install_ZendOPcache 2>&1 | tee -a $lnmp_dir/install.log
 elif [ "$PHP_cache" == '2' ];then
-        . functions/xcache.sh 
+        . functions/xcache.sh
         Install_XCache 2>&1 | tee -a $lnmp_dir/install.log
 elif [ "$PHP_cache" == '3' ];then
         . functions/apcu.sh
@@ -592,7 +596,7 @@ fi
 # Pure-FTPd
 if [ "$FTP_yn" == 'y' ];then
 	. functions/pureftpd.sh
-	Install_PureFTPd 2>&1 | tee -a $lnmp_dir/install.log 
+	Install_PureFTPd 2>&1 | tee -a $lnmp_dir/install.log
 fi
 
 # phpMyAdmin
@@ -619,28 +623,28 @@ fi
 # index example
 if [ ! -e "$wwwroot_dir/default/index.html" -a "$Web_yn" == 'y' ];then
 	. functions/test.sh
-	TEST 2>&1 | tee -a $lnmp_dir/install.log 
+	TEST 2>&1 | tee -a $lnmp_dir/install.log
 fi
 
 if [ "$HHVM_yn" == 'y' ];then
-	. functions/hhvm_CentOS.sh 
-	Install_hhvm_CentOS 2>&1 | tee -a $lnmp_dir/install.log 
+	. functions/hhvm_CentOS.sh
+	Install_hhvm_CentOS 2>&1 | tee -a $lnmp_dir/install.log
 fi
 
 echo "####################Congratulations########################"
 [ "$Web_yn" == 'y' -a "$Nginx_version" != '3' -a "$Apache_version" == '3' ] && echo -e "\n`printf "%-32s" "Nginx/Tengine install dir":`\033[32m$web_install_dir\033[0m"
-[ "$Web_yn" == 'y' -a "$Nginx_version" != '3' -a "$Apache_version" != '3' ] && echo -e "\n`printf "%-32s" "Nginx/Tengine install dir":`\033[32m$web_install_dir\033[0m\n`printf "%-32s" "Apache install  dir":`\033[32m$apache_install_dir\033[0m" 
+[ "$Web_yn" == 'y' -a "$Nginx_version" != '3' -a "$Apache_version" != '3' ] && echo -e "\n`printf "%-32s" "Nginx/Tengine install dir":`\033[32m$web_install_dir\033[0m\n`printf "%-32s" "Apache install  dir":`\033[32m$apache_install_dir\033[0m"
 [ "$Web_yn" == 'y' -a "$Nginx_version" == '3' -a "$Apache_version" != '3' ] && echo -e "\n`printf "%-32s" "Apache install dir":`\033[32m$apache_install_dir\033[0m"
 [ "$DB_yn" == 'y' ] && echo -e "\n`printf "%-32s" "Database install dir:"`\033[32m$db_install_dir\033[0m"
 [ "$DB_yn" == 'y' ] && echo -e "`printf "%-32s" "Database data dir:"`\033[32m$db_data_dir\033[0m"
 [ "$DB_yn" == 'y' ] && echo -e "`printf "%-32s" "Database user:"`\033[32mroot\033[0m"
 [ "$DB_yn" == 'y' ] && echo -e "`printf "%-32s" "Database password:"`\033[32m${dbrootpwd}\033[0m"
 [ "$PHP_yn" == 'y' ] && echo -e "\n`printf "%-32s" "PHP install dir:"`\033[32m$php_install_dir\033[0m"
-[ "$PHP_cache" == '1' ] && echo -e "`printf "%-32s" "Opcache Control Panel url:"`\033[32mhttp://$local_IP/ocp.php\033[0m" 
+[ "$PHP_cache" == '1' ] && echo -e "`printf "%-32s" "Opcache Control Panel url:"`\033[32mhttp://$local_IP/ocp.php\033[0m"
 [ "$PHP_cache" == '2' ] && echo -e "`printf "%-32s" "xcache Control Panel url:"`\033[32mhttp://$local_IP/xcache\033[0m"
 [ "$PHP_cache" == '2' ] && echo -e "`printf "%-32s" "xcache user:"`\033[32madmin\033[0m"
 [ "$PHP_cache" == '2' ] && echo -e "`printf "%-32s" "xcache password:"`\033[32m$xcache_admin_pass\033[0m"
-[ "$PHP_cache" == '3' ] && echo -e "`printf "%-32s" "APC Control Panel url:"`\033[32mhttp://$local_IP/apc.php\033[0m" 
+[ "$PHP_cache" == '3' ] && echo -e "`printf "%-32s" "APC Control Panel url:"`\033[32mhttp://$local_IP/apc.php\033[0m"
 [ "$PHP_cache" == '4' ] && echo -e "`printf "%-32s" "eAccelerator Control Panel url:"`\033[32mhttp://$local_IP/control.php\033[0m"
 [ "$PHP_cache" == '4' ] && echo -e "`printf "%-32s" "eAccelerator user:"`\033[32madmin\033[0m"
 [ "$PHP_cache" == '4' ] && echo -e "`printf "%-32s" "eAccelerator password:"`\033[32meAccelerator\033[0m"
