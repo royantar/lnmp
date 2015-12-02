@@ -3,7 +3,7 @@
 # Blog:  http://blog.linuxeye.com
 
 # Check if user is root
-[ $(id -u) != "0" ] && { echo -e "\033[31mError: You must be root to run this script\033[0m"; exit 1; } 
+[ $(id -u) != "0" ] && { echo -e "\033[31mError: You must be root to run this script\033[0m"; exit 1; }
 export PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 clear
 printf "
@@ -35,7 +35,7 @@ fi
 if [ "$PHP_HHVM" == '2' ];then
         NGX_CONF="fastcgi_pass unix:/var/log/hhvm/sock;\n\tfastcgi_index index.php;\n\tfastcgi_param SCRIPT_FILENAME \$document_root\$fastcgi_script_name;\n\tinclude fastcgi_params;"
 else
-        NGX_CONF="#fastcgi_pass remote_php_ip:9000;\n\tfastcgi_pass unix:/dev/shm/php-cgi.sock;\n\tfastcgi_index index.php;\n\tinclude fastcgi.conf;"
+        NGX_CONF="fastcgi_pass unix:/dev/shm/php-cgi.sock;\n\tfastcgi_index index.php;\n\nfastcgi_split_path_info ^(.+\.php)(/.+)$;\n\tfastcgi_param PATH_INFO \$fastcgi_path_info;\n\tfastcgi_param PATH_TRANSLATED \$document_root\$fastcgi_path_info;\n\tfastcgi_param SCRIPT_FILENAME \$document_root\$fastcgi_script_name;\n\n\t\tinclude fastcgi.conf;"
 fi
 }
 
@@ -63,11 +63,11 @@ fi
 while :
 do
 	echo ''
-        read -p "Do you want to add more domain name? [y/n]: " moredomainame_yn 
+        read -p "Do you want to add more domain name? [y/n]: " moredomainame_yn
         if [ "$moredomainame_yn" != 'y' ] && [ "$moredomainame_yn" != 'n' ];then
                 echo -e "\033[31minput error! Please only input 'y' or 'n'\033[0m"
         else
-                break 
+                break
         fi
 done
 
@@ -107,7 +107,7 @@ Nginx_anti_hotlinking()
 while :
 do
 	echo ''
-        read -p "Do you want to add hotlink protection? [y/n]: " anti_hotlinking_yn 
+        read -p "Do you want to add hotlink protection? [y/n]: " anti_hotlinking_yn
         if [ "$anti_hotlinking_yn" != 'y' ] && [ "$anti_hotlinking_yn" != 'n' ];then
                 echo -e "\033[31minput error! Please only input 'y' or 'n'\033[0m"
         else
@@ -121,7 +121,7 @@ else
         domain_allow="*.$domain $domain"
 fi
 
-if [ "$anti_hotlinking_yn" == 'y' ];then 
+if [ "$anti_hotlinking_yn" == 'y' ];then
 	if [ "$moredomainame_yn" == 'y' ]; then
 		domain_allow_all=$domain_allow$moredomainame
 	else
@@ -142,7 +142,7 @@ do
         if [ "$rewrite_yn" != 'y' ] && [ "$rewrite_yn" != 'n' ];then
                 echo -e "\033[31minput error! Please only input 'y' or 'n'\033[0m"
         else
-                break 
+                break
         fi
 done
 if [ "$rewrite_yn" == 'n' ];then
@@ -156,7 +156,7 @@ else
 	if [ "$rewrite" == "" ]; then
 		rewrite="other"
 	fi
-	echo -e "You choose rewrite=\033[32m$rewrite\033[0m" 
+	echo -e "You choose rewrite=\033[32m$rewrite\033[0m"
 	if [ -s "conf/$rewrite.conf" ];then
 		/bin/cp conf/$rewrite.conf $web_install_dir/conf/$rewrite.conf
 	else
@@ -170,11 +170,11 @@ Nginx_log()
 while :
 do
 	echo ''
-        read -p "Allow Nginx/Tengine access_log? [y/n]: " access_yn 
+        read -p "Allow Nginx/Tengine access_log? [y/n]: " access_yn
         if [ "$access_yn" != 'y' ] && [ "$access_yn" != 'n' ];then
                 echo -e "\033[31minput error! Please only input 'y' or 'n'\033[0m"
         else
-                break 
+                break
         fi
 done
 if [ "$access_yn" == 'n' ]; then
@@ -193,7 +193,7 @@ server {
 listen 80;
 server_name $domain$moredomainame;
 $N_log
-index index.html index.htm index.jsp index.php;
+index index.php index.html index.htm;
 include $rewrite.conf;
 root $vhostdir;
 #error_page 404 /404.html;
@@ -235,7 +235,7 @@ printf "
 echo -e "`printf "%-32s" "Your domain:"`\033[32m$domain\033[0m"
 echo -e "`printf "%-32s" "Virtualhost conf:"`\033[32m$web_install_dir/conf/vhost/$domain.conf\033[0m"
 echo -e "`printf "%-32s" "Directory of:"`\033[32m$vhostdir\033[0m"
-[ "$rewrite_yn" == 'y' ] && echo -e "`printf "%-32s" "Rewrite rule:"`\033[32m$rewrite\033[0m" 
+[ "$rewrite_yn" == 'y' ] && echo -e "`printf "%-32s" "Rewrite rule:"`\033[32m$rewrite\033[0m"
 }
 
 Apache_log()
@@ -265,7 +265,7 @@ Create_apache_conf()
 [ ! -d $apache_install_dir/conf/vhost ] && mkdir $apache_install_dir/conf/vhost
 cat > $apache_install_dir/conf/vhost/$domain.conf << EOF
 <VirtualHost *:80>
-    ServerAdmin admin@linuxeye.com 
+    ServerAdmin admin@linuxeye.com
     DocumentRoot "$vhostdir"
     ServerName $domain
     $Domain_alias
@@ -395,7 +395,7 @@ echo -e "`printf "%-32s" "Your domain:"`\033[32m$domain\033[0m"
 echo -e "`printf "%-32s" "Nginx Virtualhost conf:"`\033[32m$web_install_dir/conf/vhost/$domain.conf\033[0m"
 echo -e "`printf "%-32s" "Apache Virtualhost conf:"`\033[32m$apache_install_dir/conf/vhost/$domain.conf\033[0m"
 echo -e "`printf "%-32s" "Directory of:"`\033[32m$vhostdir\033[0m"
-[ "$rewrite_yn" == 'y' ] && echo -e "`printf "%-32s" "Rewrite rule:"`\033[32m$rewrite\033[0m" 
+[ "$rewrite_yn" == 'y' ] && echo -e "`printf "%-32s" "Rewrite rule:"`\033[32m$rewrite\033[0m"
 }
 
 if [ -d "$web_install_dir" -a ! -d "$apache_install_dir" -a "$web_install_dir" != "$apache_install_dir" ];then
@@ -418,4 +418,4 @@ elif [ -d "$web_install_dir" -a -d "$apache_install_dir" -a "$web_install_dir" !
 	Nginx_log
 	Apache_log
 	Create_nginx_apache_conf
-fi 
+fi
