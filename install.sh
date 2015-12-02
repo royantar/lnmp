@@ -160,7 +160,7 @@ do
                                 echo -e "\t\033[32m6\033[0m. Install Percona-5.5"
                                 read -p "Please input a number:(Default 1 press Enter) " DB_version
                                 [ -z "$DB_version" ] && DB_version=1
-                                if [ $DB_version != 1 -a $DB_version != 2 -a $DB_version != 3 -a $DB_version != 4 -a $DB_version != 5 -a $DB_version != 6 ];then
+                                if [ $DB_version != 0 -a $DB_version != 1 -a $DB_version != 2 -a $DB_version != 3 -a $DB_version != 4 -a $DB_version != 5 -a $DB_version != 6 ];then
                                         echo -e "\033[31minput error! Please only input number 1,2,3,4,5,6 \033[0m"
                                 else
                                         while :
