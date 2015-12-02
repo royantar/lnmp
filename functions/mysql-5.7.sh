@@ -16,6 +16,7 @@ wget -c http://sourceforge.net/projects/boost/files/boost/1.59.0/boost_1_59_0.ta
 useradd -M -s /sbin/nologin mysql
 mkdir -p $mysql_data_dir;chown mysql.mysql -R $mysql_data_dir
 tar zxf mysql-$mysql_7_version.tar.gz
+mv boost_1_59_0.tar.gz mysql-$mysql_7_version
 cd mysql-$mysql_7_version
 if [ "$je_tc_malloc" == '1' ];then
         EXE_LINKER="-DCMAKE_EXE_LINKER_FLAGS='-ljemalloc'"
