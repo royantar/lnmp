@@ -11,6 +11,8 @@ cd $lnmp_dir/src
 
 src_url=http://cdn.mysql.com/Downloads/MySQL-5.7/mysql-$mysql_7_version.tar.gz && Download_src
 
+wget -c http://sourceforge.net/projects/boost/files/boost/1.59.0/boost_1_59_0.tar.gz
+
 useradd -M -s /sbin/nologin mysql
 mkdir -p $mysql_data_dir;chown mysql.mysql -R $mysql_data_dir
 tar zxf mysql-$mysql_7_version.tar.gz
