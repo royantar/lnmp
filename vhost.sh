@@ -190,28 +190,36 @@ Create_nginx_conf()
 [ ! -d $web_install_dir/conf/vhost ] && mkdir $web_install_dir/conf/vhost
 cat > $web_install_dir/conf/vhost/$domain.conf << EOF
 server {
-listen 80;
-server_name $domain$moredomainame;
-$N_log
-index index.php index.html index.htm;
-include $rewrite.conf;
-root $vhostdir;
-#error_page 404 /404.html;
-if ( \$query_string ~* ".*[\;'\<\>].*" ){
-	return 404;
-	}
-$anti_hotlinking
-location ~ .*\.(php|php5)?$  {
-	`echo -e $NGX_CONF`
+    listen 80;
+    server_name $domain$moredomainame;
+    $N_log
+    index index.php index.html index.htm;
+    root $vhostdir;
+
+    # error_page 404 /404.html;
+    if ( \$query_string ~* ".*[\;'\<\>].*" ){
+    	return 404;
+    }
+
+    # rewrite rules for Phalcon
+    try_files $uri $uri/ @rewrite;
+
+    location @rewrite {
+        rewrite ^/(.*)$ /index.php?_url=/$1;
+    }
+
+    $anti_hotlinking
+    location ~ .*\.(php|php5)?$  {
+    	`echo -e $NGX_CONF`
 	}
 
-location ~ .*\.(gif|jpg|jpeg|png|bmp|swf|flv|ico)$ {
-	expires 30d;
-	}
+    location ~ .*\.(gif|jpg|jpeg|png|bmp|swf|flv|ico)$ {
+    	expires 30d;
+    }
 
-location ~ .*\.(js|css)?$ {
-	expires 7d;
-	}
+    location ~ .*\.(js|css)?$ {
+    	expires 7d;
+    }
 }
 EOF
 
