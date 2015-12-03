@@ -11,12 +11,11 @@ cd $lnmp_dir/src
 
 src_url=http://cdn.mysql.com/Downloads/MySQL-5.7/mysql-$mysql_7_version.tar.gz && Download_src
 
-wget -c http://sourceforge.net/projects/boost/files/boost/1.59.0/boost_1_59_0.tar.gz
+src_url=http://sourceforge.net/projects/boost/files/boost/1.59.0/boost_1_59_0.tar.gz && Download_src
 
 useradd -M -s /sbin/nologin mysql
 mkdir -p $mysql_data_dir;chown mysql.mysql -R $mysql_data_dir
 tar zxf mysql-$mysql_7_version.tar.gz
-mv boost_1_59_0.tar.gz mysql-$mysql_7_version
 cd mysql-$mysql_7_version
 if [ "$je_tc_malloc" == '1' ];then
         EXE_LINKER="-DCMAKE_EXE_LINKER_FLAGS='-ljemalloc'"
@@ -39,7 +38,7 @@ cmake . -DCMAKE_INSTALL_PREFIX=$mysql_install_dir \
 -DDEFAULT_COLLATION=utf8_general_ci \
 -DWITH_EMBEDDED_SERVER=1 \
 -DDOWNLOAD_BOOST=1 \
--DWITH_BOOST=./ \
+-DWITH_BOOST=../ \
 $EXE_LINKER
 make -j `grep processor /proc/cpuinfo | wc -l`
 make install
@@ -52,8 +51,8 @@ else
         kill -9 $$
 fi
 
-/bin/cp support-files/mysql.server /etc/init.d/mysqld
-chmod +x /etc/init.d/mysqld
+/bin/cp support-files/mysql.server /etc/init.d/mysql
+chmod +x /etc/init.d/mysql
 OS_CentOS='chkconfig --add mysqld \n
 chkconfig mysqld on'
 OS_Debian_Ubuntu='update-rc.d mysqld defaults'
@@ -184,22 +183,22 @@ elif [ $Memtatol -gt 3500 ];then
         sed -i 's@^table_open_cache.*@table_open_cache = 1024@' /etc/my.cnf
 fi
 
-$mysql_install_dir/scripts/mysql_install_db --user=mysql --basedir=$mysql_install_dir --datadir=$mysql_data_dir
+$mysql_install_dir/bin/mysqld --initialize-insecure --user=mysql
+$mysql_install_dir/bin/mysql_ssl_rsa_setup
 
+chown mysql.mysql -R $mysql_install_dir
 chown mysql.mysql -R $mysql_data_dir
-service mysqld start
+service mysql start
+
+
 [ -z "`grep ^'export PATH=' /etc/profile`" ] && echo "export PATH=$mysql_install_dir/bin:\$PATH" >> /etc/profile
 [ -n "`grep ^'export PATH=' /etc/profile`" -a -z "`grep $mysql_install_dir /etc/profile`" ] && sed -i "s@^export PATH=\(.*\)@export PATH=$mysql_install_dir/bin:\1@" /etc/profile
 . /etc/profile
 
-$mysql_install_dir/bin/mysql -e "grant all privileges on *.* to root@'127.0.0.1' identified by \"$dbrootpwd\" with grant option;"
-$mysql_install_dir/bin/mysql -e "grant all privileges on *.* to root@'localhost' identified by \"$dbrootpwd\" with grant option;"
-$mysql_install_dir/bin/mysql -uroot -p$dbrootpwd -e "delete from mysql.user where Password='';"
-$mysql_install_dir/bin/mysql -uroot -p$dbrootpwd -e "delete from mysql.db where User='';"
-$mysql_install_dir/bin/mysql -uroot -p$dbrootpwd -e "delete from mysql.proxies_priv where Host!='localhost';"
-$mysql_install_dir/bin/mysql -uroot -p$dbrootpwd -e "drop database test;"
-$mysql_install_dir/bin/mysql -uroot -p$dbrootpwd -e "reset master;"
+#设定root初始密码
+$mysql_install_dir/bin/mysql -u root --skip-password -e "ALTER USER 'root'@'localhost' IDENTIFIED BY \"$dbrootpwd\";"
+
 sed -i "s@^db_install_dir.*@db_install_dir=$mysql_install_dir@" options.conf
 sed -i "s@^db_data_dir.*@db_data_dir=$mysql_data_dir@" options.conf
-service mysqld stop
+service mysql stop
 }
