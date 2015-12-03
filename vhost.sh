@@ -35,7 +35,7 @@ fi
 if [ "$PHP_HHVM" == '2' ];then
         NGX_CONF="fastcgi_pass unix:/var/log/hhvm/sock;\n\tfastcgi_index index.php;\n\tfastcgi_param SCRIPT_FILENAME \$document_root\$fastcgi_script_name;\n\tinclude fastcgi_params;"
 else
-        NGX_CONF="fastcgi_pass unix:/dev/shm/php-cgi.sock;\n\tfastcgi_index index.php;\n\nfastcgi_split_path_info ^(.+\.php)(/.+)$;\n\tfastcgi_param PATH_INFO \$fastcgi_path_info;\n\tfastcgi_param PATH_TRANSLATED \$document_root\$fastcgi_path_info;\n\tfastcgi_param SCRIPT_FILENAME \$document_root\$fastcgi_script_name;\n\n\t\tinclude fastcgi.conf;"
+        NGX_CONF="\tfastcgi_pass unix:/dev/shm/php-cgi.sock;\n\tfastcgi_index index.php;\n\nfastcgi_split_path_info ^(.+\.php)(/.+)$;\n\tfastcgi_param PATH_INFO \$fastcgi_path_info;\n\tfastcgi_param PATH_TRANSLATED \$document_root\$fastcgi_path_info;\n\tfastcgi_param SCRIPT_FILENAME \$document_root\$fastcgi_script_name;\n\n\tinclude fastcgi.conf;"
 fi
 }
 
