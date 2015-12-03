@@ -202,10 +202,10 @@ server {
     }
 
     # rewrite rules for Phalcon
-    try_files $uri $uri/ @rewrite;
+    try_files \$uri \$uri/ @rewrite;
 
     location @rewrite {
-        rewrite ^/(.*)$ /index.php?_url=/$1;
+        rewrite ^/(.*)$ /index.php?_url=/\$1;
     }
 
     $anti_hotlinking
